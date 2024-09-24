@@ -9,8 +9,10 @@ public partial class Program
     private static readonly EFOpleidingenContext _context = new EFOpleidingenContext();
     //Repositories
     private static IDocentRepository _docentRepository = new SQLDocentRepository(_context);
+    private static IDocentOpleidingRepository _docentOpleidingRepository = new SQLDocentOpleidingRepository(_context);
     //Services
     private static readonly DocentService _docentService = new DocentService(_docentRepository);
+    private static readonly DocentOpleidingService _docentOpleidingService = new DocentOpleidingService(_docentOpleidingRepository);
 
     public static string MenuGegevens => $"";
     public static SubMenu menu = new SubMenu(01, null, "MuziekMenu", MenuItemActive.Enabled, MenuItemVisible.Visible, new List<MenuItem> {
@@ -30,7 +32,7 @@ public partial class Program
         var docentenLijst = GetAllDocenten();
         if (docentenLijst.Count() > 0)
         {
-        LeesLijst("Docenten", docentenLijst, docentenLijst.OrderBy(docent => docent.Familienaam).ThenBy(docent => docent.Voornaam).Select(docent => "(" + docent.Id + ") " + docent.Familienaam + " " + docent.Voornaam).ToList(), SelectionMode.None);
+            LeesLijst("Docenten", docentenLijst, docentenLijst.OrderBy(docent => docent.Familienaam).ThenBy(docent => docent.Voornaam).Select(docent => "(" + docent.Id + ") " + docent.Familienaam + " " + docent.Voornaam).ToList(), SelectionMode.None);
         }
         else
         {
@@ -64,16 +66,49 @@ public partial class Program
     }
     public static void OpleidingenDocent()
     {
-        throw new NotImplementedException();
-    }
-    public static void NieuweDocent()
-    {
-        throw new NotImplementedException();
-    }
-    //Functies
-    public static List<Docent> GetAllDocenten()
-    {
-        return (List<Docent>)_docentService.GetAllDocentenAsync().Result;
-    }
+        List<DocentOpleiding> docentOpleidingLijst = GetAllDocentOpleidingen();
+        List<Docent> docentenLijst = GetAllDocenten();
+        if (docentOpleidingLijst.Count > 0)
+        {
+            if (docentenLijst.Count > 0)
+            {
+                LeesLijst("Docenten",
+                    docentenLijst,
+                    docentenLijst
+                    .OrderBy(docent => docent.Id)
+                    .Select(docent => "(" + docent.Id + ") " + docent.Familienaam + " " + docent.Voornaam)
+                    .ToList(), SelectionMode.None);
+                int gegevenId = (int)LeesInt("Welke Docent hun Opleidingen wilt u zien?", 0, int.MaxValue, OptionMode.Mandatory)!;
+                
+                    var docentOpleiding = docentOpleidingLijst.Where(docent => docent.DocentId == gegevenId)
+                        .Select(docentOpleiding => docentOpleiding.OpleidingId + ") " + docentOpleiding.opleiding.Naam)
+                        .ToList();
+                LeesLijst($"Docent met id {gegevenId}'s Opleidingen", docentOpleiding, docentOpleiding.ToList(), SelectionMode.None);
+                //Maak naam ervan
+            }
+            else
+            {
+                ToonFoutBoodschap("Er zijn geen docenten");
+            }
+        }
+        else
+        {
+            ToonFoutBoodschap("Er zijn geen Docent Opleidingen.");
+        } 
 
-}
+    }
+        public static void NieuweDocent()
+        {
+            throw new NotImplementedException();
+        }
+        //Functies
+        public static List<Docent> GetAllDocenten()
+        {
+            return (List<Docent>)_docentService.GetAllDocentenAsync().Result;
+        }
+        public static List<DocentOpleiding> GetAllDocentOpleidingen()
+        {
+            return (List<DocentOpleiding>)_docentOpleidingService.GetAllDocentOpleidingenAsync().Result;
+        }
+
+    }

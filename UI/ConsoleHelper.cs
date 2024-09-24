@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Numerics;
 using System.Text.RegularExpressions;
 
-namespace UIConsole;
+namespace UI;
 
 public enum OptionMode { Optional = 0, Mandatory = 1 }
 public enum SelectionMode { None = 0, Single = 1, Multiple = 2 }

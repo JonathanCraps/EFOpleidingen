@@ -6,5 +6,5 @@ public class Docent
     public required string Voornaam { get; set; } = null!;
     public required string Familienaam { get; set; } = null!;
     public required decimal Wedde { get; set; }
-    public virtual ICollection<Opleiding> opleidingen { get; set; } = new List<Opleiding>();
+    public virtual ICollection<DocentOpleiding> docentOpleidingen { get; set; } = new List<DocentOpleiding>();
 }

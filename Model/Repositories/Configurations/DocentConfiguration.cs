@@ -18,6 +18,7 @@ class DocentConfiguration : IEntityTypeConfiguration<Docent>
             .IsRequired()
             .HasMaxLength(30);
         builder.Property(docent => docent.Wedde)
-            .IsRequired();
+            .IsRequired()
+            .HasColumnType("decimal");
     }
 }

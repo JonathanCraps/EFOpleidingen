@@ -1,6 +1,6 @@
 ﻿// Johan Vandaele - Versie: 20230315
 
-namespace UIConsole;
+namespace UI;
 
 public partial class Program
 {

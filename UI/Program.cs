@@ -15,7 +15,7 @@ public partial class Program
     public static string MenuGegevens => $"";
     public static SubMenu menu = new SubMenu(01, null, "MuziekMenu", MenuItemActive.Enabled, MenuItemVisible.Visible, new List<MenuItem> {
         new MenuAction(02, "<1> Docenten", "Geeft de Docenten weer op naam", MenuItemActive.Enabled, MenuItemVisible.Visible, Docenten),
-        new MenuAction(03, "<2> Docent met wedde vanaf", "Geeft de Docenten met Weddes die groter zijn dan (getal) weer", MenuItemActive.Enabled, MenuItemVisible.Visible, WeddesGroterDan),
+        new MenuAction(03, "<2> Docent met wedde vanaf", "Geeft de Docenten weer met Weddes die groter zijn dan (getal)", MenuItemActive.Enabled, MenuItemVisible.Visible, WeddesGroterDan),
         new MenuAction(04, "<3> Opleidingen Docent", "Geeft de Opleidingen weer van een Docent", MenuItemActive.Enabled, MenuItemVisible.Visible, OpleidingenDocent),
         new MenuAction(05, "<4> Toevoegen Docent", "Maak een nieuwe Docent aan", MenuItemActive.Enabled, MenuItemVisible.Visible, NieuweDocent)
 
@@ -41,15 +41,26 @@ public partial class Program
     public static void WeddesGroterDan()
     {
         List<Docent> docentenLijst = GetAllDocenten();
-        decimal gegevenWedde = (decimal)LeesDecimal("Vanaf welke wedde wilt u de docenten zien?", 0, decimal.MaxValue, OptionMode.Mandatory)!;
-        LeesLijst($"Docenten waarvan de Wedde groter is dan {gegevenWedde} euro per maand",
-            docentenLijst,
-            docentenLijst
-            .Where(docent => docent.Wedde >= gegevenWedde)
-            .OrderBy(docent => docent.Wedde)
-            .Select(docent => "[" + docent.Wedde + " euro/maand]" + docent.Voornaam + " " + docent.Familienaam)
-            .ToList(),
-            SelectionMode.None);
+        if (docentenLijst.Count() > 0)
+        {
+            var weddeLijst = docentenLijst.Select(docent => docent.Wedde);
+            decimal minimumWedde = weddeLijst.Min();
+            decimal maximumWedde = weddeLijst.Max();
+
+            decimal gegevenWedde = (decimal)LeesDecimal($"Vanaf welke wedde wilt u de docenten zien? (bedrag moet tussen {minimumWedde} en {maximumWedde} liggen)", minimumWedde, maximumWedde, OptionMode.Mandatory)!;
+            LeesLijst($"Docenten waarvan de Wedde groter is dan {gegevenWedde} euro per maand",
+                docentenLijst,
+                docentenLijst
+                .Where(docent => docent.Wedde >= gegevenWedde)
+                .OrderBy(docent => docent.Wedde)
+                .Select(docent => "[" + docent.Wedde + " euro/maand]" + docent.Voornaam + " " + docent.Familienaam)
+                .ToList(),
+                SelectionMode.None);
+        }
+        else
+        {
+            ToonFoutBoodschap("Er zijn geen docenten");
+        }
     }
     public static void OpleidingenDocent()
     {

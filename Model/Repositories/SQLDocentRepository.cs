@@ -11,4 +11,9 @@ public class SQLDocentRepository : IDocentRepository
     {
         return await context.Docenten.ToListAsync();
     }
+    public async Task AddDocentAsync(Docent docent)
+    {
+        await context.Docenten.AddAsync(docent);
+        await context.SaveChangesAsync();
+    }
 }

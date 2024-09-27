@@ -79,12 +79,19 @@ public partial class Program
                     .Select(docent => "(" + docent.Id + ") " + docent.Familienaam + " " + docent.Voornaam)
                     .ToList(), SelectionMode.None);
                 int gegevenId = (int)LeesInt("Welke Docent hun Opleidingen wilt u zien?", 0, int.MaxValue, OptionMode.Mandatory)!;
-                
-                    var docentOpleiding = docentOpleidingLijst.Where(docent => docent.DocentId == gegevenId)
-                        .Select(docentOpleiding => docentOpleiding.OpleidingId + ") " + docentOpleiding.opleiding.Naam)
-                        .ToList();
-                LeesLijst($"Docent met id {gegevenId}'s Opleidingen", docentOpleiding, docentOpleiding.ToList(), SelectionMode.None);
-                //Maak naam ervan
+
+                var docentOpleiding = docentOpleidingLijst.Where(docent => docent.DocentId == gegevenId)
+                    .Select(docentOpleiding => docentOpleiding.OpleidingId + ") " + docentOpleiding.opleiding.Naam + ", Expertise : " + docentOpleiding.Expertise + "/10")
+                    .ToList();
+                if (docentOpleiding.Count > 0)
+                {
+                    LeesLijst($"Docent met id {gegevenId}'s Opleidingen", docentOpleiding, docentOpleiding.ToList(), SelectionMode.None);
+                }
+                else
+                {
+                    ToonFoutBoodschap($"De geselecteerde Docent heeft geen Opleidingen.");
+                }
+
             }
             else
             {
@@ -94,21 +101,24 @@ public partial class Program
         else
         {
             ToonFoutBoodschap("Er zijn geen Docent Opleidingen.");
-        } 
-
-    }
-        public static void NieuweDocent()
-        {
-            throw new NotImplementedException();
-        }
-        //Functies
-        public static List<Docent> GetAllDocenten()
-        {
-            return (List<Docent>)_docentService.GetAllDocentenAsync().Result;
-        }
-        public static List<DocentOpleiding> GetAllDocentOpleidingen()
-        {
-            return (List<DocentOpleiding>)_docentOpleidingService.GetAllDocentOpleidingenAsync().Result;
         }
 
     }
+    public static void NieuweDocent()
+    {
+        string dVoornaam = LeesString("Wat is de Voornaam van de Docent?",0, 40, OptionMode.Mandatory)!;
+        string dFamilienaam = LeesString("Wat is de Familienaam van de Docent?",0, 40, OptionMode.Mandatory)!;
+        decimal dWedde = (decimal)LeesDecimal("Wat is de Wedde van de Docent?",0,decimal.MaxValue, OptionMode.Mandatory)!;
+        _ =_docentService.AddDocentAsync(new Docent { Voornaam = dVoornaam, Familienaam = dFamilienaam, Wedde = dWedde });
+    }
+    //Functies
+    public static List<Docent> GetAllDocenten()
+    {
+        return (List<Docent>)_docentService.GetAllDocentenAsync().Result;
+    }
+    public static List<DocentOpleiding> GetAllDocentOpleidingen()
+    {
+        return (List<DocentOpleiding>)_docentOpleidingService.GetAllDocentOpleidingenAsync().Result;
+    }
+
+}

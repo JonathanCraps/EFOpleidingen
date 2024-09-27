@@ -29,10 +29,10 @@ public partial class Program
     //Menu Onderdelen
     public static void Docenten()
     {
-        var docentenLijst = GetAllDocenten();
+        var docentenLijst = _docentService.GetAllDocentenOrderedByNameAsync().Result;
         if (docentenLijst.Count() > 0)
         {
-            LeesLijst("Docenten", docentenLijst, docentenLijst.OrderBy(docent => docent.Familienaam).ThenBy(docent => docent.Voornaam).Select(docent => "(" + docent.Id + ") " + docent.Familienaam + " " + docent.Voornaam).ToList(), SelectionMode.None);
+            LeesLijst("Docenten", docentenLijst, docentenLijst.Select(docent => "(" + docent.Id + ") " + docent.Familienaam + " " + docent.Voornaam).ToList(), SelectionMode.None);
         }
         else
         {
@@ -42,84 +42,61 @@ public partial class Program
     }
     public static void WeddesGroterDan()
     {
-        List<Docent> docentenLijst = GetAllDocenten();
-        if (docentenLijst.Count() > 0)
+        decimal gegevenWedde = (decimal)LeesDecimal($"Vanaf welke wedde wilt u de docenten zien? liggen)", 0, decimal.MaxValue, OptionMode.Mandatory)!;
+        var weddeLijst = _docentService.GetDocentenByMinWeddeAsync(gegevenWedde).Result;
+        if (weddeLijst.Count() > 0)
         {
-            var weddeLijst = docentenLijst.Select(docent => docent.Wedde);
-            decimal minimumWedde = weddeLijst.Min();
-            decimal maximumWedde = weddeLijst.Max();
-
-            decimal gegevenWedde = (decimal)LeesDecimal($"Vanaf welke wedde wilt u de docenten zien? (bedrag moet tussen {minimumWedde} en {maximumWedde} liggen)", minimumWedde, maximumWedde, OptionMode.Mandatory)!;
             LeesLijst($"Docenten waarvan de Wedde groter is dan {gegevenWedde} euro per maand",
-                docentenLijst,
-                docentenLijst
-                .Where(docent => docent.Wedde >= gegevenWedde)
-                .OrderBy(docent => docent.Wedde)
-                .Select(docent => "[" + docent.Wedde + " euro/maand]" + docent.Voornaam + " " + docent.Familienaam)
+                weddeLijst,
+                weddeLijst
+                .Select(docent => "[" + docent.Wedde + " euro/maand] " + docent.Voornaam + " " + docent.Familienaam)
                 .ToList(),
                 SelectionMode.None);
         }
         else
         {
-            ToonFoutBoodschap("Er zijn geen docenten");
+            ToonFoutBoodschap("Er zijn geen Docenten met die minimum wedde.");
         }
     }
+
+
     public static void OpleidingenDocent()
     {
-        List<DocentOpleiding> docentOpleidingLijst = GetAllDocentOpleidingen();
-        List<Docent> docentenLijst = GetAllDocenten();
-        if (docentOpleidingLijst.Count > 0)
+        List<Docent> docentenLijst = (List<Docent>)_docentService.GetAllDocentenOrderedById().Result;
+        if (docentenLijst.Count > 0)
         {
-            if (docentenLijst.Count > 0)
+            int gegevenId = (int)LeesInt("Welke Docent hun Opleidingen wilt u zien?", 0, int.MaxValue, OptionMode.Mandatory)!;
+            List<DocentOpleiding> docentOpleidingLijst = (List<DocentOpleiding>)_docentOpleidingService.GetAllDocentOpleidingenByDocentIdAsync(gegevenId).Result;
+            Docent? gegevenDocent = docentOpleidingLijst.FirstOrDefault()?.docent;
+            if (gegevenDocent != null)
             {
-                LeesLijst("Docenten",
-                    docentenLijst,
-                    docentenLijst
-                    .OrderBy(docent => docent.Id)
-                    .Select(docent => "(" + docent.Id + ") " + docent.Familienaam + " " + docent.Voornaam)
-                    .ToList(), SelectionMode.None);
-                int gegevenId = (int)LeesInt("Welke Docent hun Opleidingen wilt u zien?", 0, int.MaxValue, OptionMode.Mandatory)!;
-                Docent gegevenDocent = docentenLijst.ElementAt(gegevenId - 1);
-
-                var docentOpleiding = docentOpleidingLijst.Where(docent => docent.DocentId == gegevenId)
-                    .Select(docentOpleiding => docentOpleiding.OpleidingId + ") " + docentOpleiding.opleiding.Naam + ", Expertise : " + docentOpleiding.Expertise + "/10")
-                    .ToList();
-                if (docentOpleiding.Count > 0)
+                if (docentOpleidingLijst.Count > 0)
                 {
-                    LeesLijst($"{gegevenDocent.Familienaam} {gegevenDocent.Voornaam} 's Opleidingen", docentOpleiding, docentOpleiding.ToList(), SelectionMode.None);
+                    LeesLijst($"{gegevenDocent.Familienaam} {gegevenDocent.Voornaam} 's Opleidingen", docentOpleidingLijst, docentOpleidingLijst.Select(docentOpleiding => docentOpleiding.OpleidingId + ") " + docentOpleiding.opleiding.Naam + ", Expertise : " + docentOpleiding.Expertise + "/10").ToList(), SelectionMode.None);
                 }
                 else
                 {
                     ToonFoutBoodschap($"De geselecteerde Docent heeft geen Opleidingen.");
                 }
-
             }
             else
             {
-                ToonFoutBoodschap("Er zijn geen docenten");
+                ToonFoutBoodschap("Deze leerkracht bestaat niet.");
             }
         }
         else
         {
-            ToonFoutBoodschap("Er zijn geen Docent Opleidingen.");
+            ToonFoutBoodschap("Er zijn geen Docenten");
         }
+        
 
     }
     public static void NieuweDocent()
     {
-        string dVoornaam = LeesString("Wat is de Voornaam van de Docent?",0, 40, OptionMode.Mandatory)!;
-        string dFamilienaam = LeesString("Wat is de Familienaam van de Docent?",0, 40, OptionMode.Mandatory)!;
-        decimal dWedde = (decimal)LeesDecimal("Wat is de Wedde van de Docent?",0,decimal.MaxValue, OptionMode.Mandatory)!;
-        _ =_docentService.AddDocentAsync(new Docent { Voornaam = dVoornaam, Familienaam = dFamilienaam, Wedde = dWedde });
-    }
-    //Functies
-    public static List<Docent> GetAllDocenten()
-    {
-        return (List<Docent>)_docentService.GetAllDocentenAsync().Result;
-    }
-    public static List<DocentOpleiding> GetAllDocentOpleidingen()
-    {
-        return (List<DocentOpleiding>)_docentOpleidingService.GetAllDocentOpleidingenAsync().Result;
+        string dVoornaam = LeesString("Wat is de Voornaam van de Docent?", 0, 40, OptionMode.Mandatory)!;
+        string dFamilienaam = LeesString("Wat is de Familienaam van de Docent?", 0, 40, OptionMode.Mandatory)!;
+        decimal dWedde = (decimal)LeesDecimal("Wat is de Wedde van de Docent?", 0, decimal.MaxValue, OptionMode.Mandatory)!;
+        _ = _docentService.AddDocentAsync(new Docent { Voornaam = dVoornaam, Familienaam = dFamilienaam, Wedde = dWedde });
     }
 
 }

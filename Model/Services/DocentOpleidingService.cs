@@ -9,4 +9,5 @@ public class DocentOpleidingService
     public DocentOpleidingService(IDocentOpleidingRepository repository) => this._repository = repository;
 
     public async Task<ICollection<DocentOpleiding>> GetAllDocentOpleidingenAsync() => await _repository.GetAllDocentOpleidingenAsync();
+    public async Task<ICollection<DocentOpleiding>> GetAllDocentOpleidingenByDocentIdAsync(int gegevenId) => await _repository.GetAllDocentOpleidingenByDocentIdAsync(gegevenId);
 }

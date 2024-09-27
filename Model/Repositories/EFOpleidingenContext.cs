@@ -29,7 +29,9 @@ public class EFOpleidingenContext : DbContext
         
         var connectionString = configuration.GetConnectionString(connection);
         if (connectionString != null) {
-            optionsBuilder.UseSqlServer(connectionString, options => options.MaxBatchSize(150));
+            optionsBuilder.UseSqlServer(connectionString, options => options.MaxBatchSize(150))
+            .LogTo(Console.WriteLine, new[] { DbLoggerCategory.Database.Command.Name }, Microsoft.Extensions.Logging.LogLevel.Information, Microsoft.EntityFrameworkCore.Diagnostics.DbContextLoggerOptions.Level | Microsoft.EntityFrameworkCore.Diagnostics.DbContextLoggerOptions.LocalTime)
+                    .EnableSensitiveDataLogging(true);
         }
         else
         {

@@ -79,13 +79,14 @@ public partial class Program
                     .Select(docent => "(" + docent.Id + ") " + docent.Familienaam + " " + docent.Voornaam)
                     .ToList(), SelectionMode.None);
                 int gegevenId = (int)LeesInt("Welke Docent hun Opleidingen wilt u zien?", 0, int.MaxValue, OptionMode.Mandatory)!;
+                Docent gegevenDocent = docentenLijst.ElementAt(gegevenId - 1);
 
                 var docentOpleiding = docentOpleidingLijst.Where(docent => docent.DocentId == gegevenId)
                     .Select(docentOpleiding => docentOpleiding.OpleidingId + ") " + docentOpleiding.opleiding.Naam + ", Expertise : " + docentOpleiding.Expertise + "/10")
                     .ToList();
                 if (docentOpleiding.Count > 0)
                 {
-                    LeesLijst($"Docent met id {gegevenId}'s Opleidingen", docentOpleiding, docentOpleiding.ToList(), SelectionMode.None);
+                    LeesLijst($"{gegevenDocent.Familienaam} {gegevenDocent.Voornaam} 's Opleidingen", docentOpleiding, docentOpleiding.ToList(), SelectionMode.None);
                 }
                 else
                 {

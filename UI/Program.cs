@@ -65,6 +65,7 @@ public partial class Program
         List<Docent> docentenLijst = (List<Docent>)_docentService.GetAllDocentenOrderedById().Result;
         if (docentenLijst.Count > 0)
         {
+            LeesLijst("Docenten", docentenLijst, docentenLijst.Select(docent => $"[{docent.Id}] {docent.Familienaam} {docent.Voornaam}").ToList(), SelectionMode.None);
             int gegevenId = (int)LeesInt("Welke Docent hun Opleidingen wilt u zien?", 0, int.MaxValue, OptionMode.Mandatory)!;
             List<DocentOpleiding> docentOpleidingLijst = (List<DocentOpleiding>)_docentOpleidingService.GetAllDocentOpleidingenByDocentIdAsync(gegevenId).Result;
             Docent? gegevenDocent = docentOpleidingLijst.FirstOrDefault()?.docent;
